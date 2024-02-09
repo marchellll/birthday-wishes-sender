@@ -15,10 +15,7 @@ Similar thing happened when the user edit their birthday, we just adjust the nex
 sequenceDiagram
     participant User
     participant API
-    participant Scheduler
-    participant Worker
-    participant Database
-    participant Email
+    participant DB
 
     User->> API: POST /user
     API->>DB: INSERT INTO users...
