@@ -20,6 +20,7 @@ export class User extends Model {
   @PrimaryKey
   @Column({
     type: DataType.BIGINT.UNSIGNED,
+    autoIncrement: true,
   })
   id: number;
 

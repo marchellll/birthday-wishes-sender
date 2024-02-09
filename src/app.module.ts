@@ -5,6 +5,8 @@ import { UserModule } from './user/user.module';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { SequelizeModule } from '@nestjs/sequelize';
 
+import { User } from './user/entities/user.entity';
+
 @Module({
   imports: [
     UserModule,
@@ -18,7 +20,7 @@ import { SequelizeModule } from '@nestjs/sequelize';
         username: configService.get('DB_USERNAME'),
         password: configService.get('DB_PASSWORD'),
         database: configService.get('DB_DATABASE'),
-        models: [],
+        models: [User],
       }),
       inject: [ConfigService],
     })
