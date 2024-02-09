@@ -1,4 +1,4 @@
-# Surya Digital
+# Birthday Wishes Sender
 
 ## Installation
 
