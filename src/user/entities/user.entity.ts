@@ -1,11 +1,12 @@
 import {
   Column,
-  Index,
   Model,
   PrimaryKey,
   Table,
-  Unique,
   DataType,
+  CreatedAt,
+  UpdatedAt,
+  DeletedAt,
 } from 'sequelize-typescript';
 
 
@@ -37,12 +38,12 @@ export class User extends Model {
   @Column
   birthdate: Date;
 
-  @Column
+  @CreatedAt
   created_at: Date;
 
-  @Column
+  @UpdatedAt
   updated_at: Date;
 
-  @Column
+  @DeletedAt
   deleted_at: Date;
 }

@@ -4,13 +4,27 @@
 
 ```bash
 $ pnpm install
+
+# copy the env
+$ cp env.example .env
 ```
+
+## Setup DB
+
+```bash
+# create a new database
+$ sequelize db:create
+
+# run the migrations
+$ sequelize db:migrate
+```
+
+[Reference](https://sequelize.org/docs/v6/other-topics/migrations/)
 
 ## Running the app
 
 ```bash
-# copy the env
-$ cp env.example .env
+
 
 # development
 $ pnpm run start
