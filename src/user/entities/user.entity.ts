@@ -4,7 +4,8 @@ import {
   Model,
   PrimaryKey,
   Table,
-  Unique
+  Unique,
+  DataType,
 } from 'sequelize-typescript';
 
 
@@ -16,6 +17,9 @@ import {
 })
 export class User extends Model {
   @PrimaryKey
+  @Column({
+    type: DataType.BIGINT.UNSIGNED,
+  })
   id: number;
 
   @Column
