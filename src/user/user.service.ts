@@ -83,8 +83,8 @@ export class UserService {
       next_birthday = birthdate_this_year.plus({ years: 1 });
     }
 
-    // set the time to 9am
-    next_birthday = next_birthday.set({ hour: 9 });
+    // set the time to 9am minus 1 second
+    next_birthday = next_birthday.set({ hour: 9 }).minus({ second: 1 });
 
     return next_birthday.toJSDate();
   };

@@ -1,15 +1,23 @@
 import { Module } from '@nestjs/common';
+
+// root module
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import { UserModule } from './user/user.module';
 import { ConfigModule, ConfigService } from '@nestjs/config';
+
+// db module
 import { SequelizeModule } from '@nestjs/sequelize';
+// user module
+
+import { UserModule } from './user/user.module';
+
+// scheduler module
+import { ScheduleModule } from '@nestjs/schedule';
 
 const MUST_BE_FALSE_IN_PRODUCTION = false;
 
 @Module({
   imports: [
-    UserModule,
     ConfigModule.forRoot(),
     SequelizeModule.forRootAsync({
       imports: [ConfigModule],
@@ -25,7 +33,9 @@ const MUST_BE_FALSE_IN_PRODUCTION = false;
         synchronize: MUST_BE_FALSE_IN_PRODUCTION,
       }),
       inject: [ConfigService],
-    })
+    }),
+    UserModule,
+    ScheduleModule.forRoot(),
   ],
   controllers: [AppController],
   providers: [AppService],
