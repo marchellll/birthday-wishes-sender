@@ -4,7 +4,7 @@ import { BullModule } from '@nestjs/bull';
 
 import { UserService } from './user.service';
 import { UserController } from './user.controller';
-import { ScheduledMesssagesTaskService } from './scheduled-messsages-task-service.service';
+import { ScheduledMesssagesTaskService } from './scheduled-messsages-task.service';
 import { ScheduledMessagesProcessor} from './scheduled-messages.processor';
 
 import { User } from './entities/user.entity';
