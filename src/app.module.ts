@@ -5,7 +5,7 @@ import { UserModule } from './user/user.module';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { SequelizeModule } from '@nestjs/sequelize';
 
-import { User } from './user/entities/user.entity';
+const MUST_BE_FALSE_IN_PRODUCTION = false;
 
 @Module({
   imports: [
@@ -20,7 +20,9 @@ import { User } from './user/entities/user.entity';
         username: configService.get('DB_USERNAME'),
         password: configService.get('DB_PASSWORD'),
         database: configService.get('DB_DATABASE'),
-        models: [User],
+        autoLoadModels: true,
+        // MUST be false in production
+        synchronize: MUST_BE_FALSE_IN_PRODUCTION,
       }),
       inject: [ConfigService],
     })
