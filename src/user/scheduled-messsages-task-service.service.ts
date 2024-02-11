@@ -1,27 +1,34 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { Cron, CronExpression } from '@nestjs/schedule';
-import { InjectConnection, InjectModel } from '@nestjs/sequelize';
-import { Sequelize, Op, Transaction } from 'sequelize';
+import { InjectModel } from '@nestjs/sequelize';
+import { Op } from 'sequelize';
+
+import { Queue } from 'bull';
+import { InjectQueue } from '@nestjs/bull';
+
 import { DateTime } from 'luxon';
 import * as _ from 'lodash';
 
-import { User } from './entities/user.entity';
 import { ScheduledMessages } from './entities/scheduled-message.entity';
 
 
 @Injectable()
-export class ScheduleMesssagesTaskServiceService {
-  private readonly logger = new Logger(ScheduleMesssagesTaskServiceService.name);
+export class ScheduledMesssagesTaskService {
+  private readonly logger = new Logger(ScheduledMesssagesTaskService.name);
 
   constructor(
     @InjectModel(ScheduledMessages)
     private scheduled_message_model: typeof ScheduledMessages,
 
-    @InjectConnection()
-    private sequelize: Sequelize,
+    @InjectQueue('scheduled-messages')
+    private schedule_message_queue: Queue,
   ) {}
 
-  @Cron(CronExpression.EVERY_30_SECONDS)
+  // 10 minutes is the assumed equilibirum
+  // it is not too fast so, 2 jobs (hopefully) won't overlap
+  // and not too slow, so the message won't be too late
+  @Cron(CronExpression.EVERY_30_SECONDS) // for testing
+  // @Cron(CronExpression.EVERY_10_MINUTES)
   async handleCron() {
     this.logger.debug('Sending scheduled messages');
 
@@ -37,12 +44,15 @@ export class ScheduleMesssagesTaskServiceService {
             [Op.lte]: now,
           },
           // start from the last id
+          // so no skipped/duplicated message
           id: {
             [Op.gt]: last_id,
           },
         },
         order: [['id', 'ASC']],
-        limit: 50, // TODO: make configurable
+        // TODO: make configurable
+        // memory is limited, so we need to limit the query
+        limit: 100,
       });
 
       if (messages.length === 0) {
@@ -50,10 +60,14 @@ export class ScheduleMesssagesTaskServiceService {
         break;
       }
 
-      await Promise.all(messages.map(async (message) => {
-        this.logger.debug(`Sending message to ${message.recipient}`);
-        // TODO: publish to queue
-      }));
+      const result = await this.schedule_message_queue.addBulk(messages.map((message) => ({
+        data: {
+          scheduled_message_id: message.id,
+        },
+      })));
+
+      this.logger.debug(`Processed ${result.length} messages`);
+      this.logger.debug(result);
 
       last_id = _.get(messages, messages.length - 1, { id: 0 }).id;
 

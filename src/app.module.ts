@@ -14,11 +14,16 @@ import { UserModule } from './user/user.module';
 // scheduler module
 import { ScheduleModule } from '@nestjs/schedule';
 
+// queue module
+import { BullModule } from '@nestjs/bull';
+
 const MUST_BE_FALSE_IN_PRODUCTION = false;
 
 @Module({
   imports: [
     ConfigModule.forRoot(),
+
+    // DB
     SequelizeModule.forRootAsync({
       imports: [ConfigModule],
       useFactory: (configService: ConfigService) => ({
@@ -34,6 +39,20 @@ const MUST_BE_FALSE_IN_PRODUCTION = false;
       }),
       inject: [ConfigService],
     }),
+
+
+    // Queue
+    BullModule.forRootAsync({
+      imports: [ConfigModule],
+      useFactory: async (configService: ConfigService) => ({
+        redis: {
+          host: configService.get('REDIS_HOST'),
+          port: configService.get('REDIS_PORT'),
+        },
+      }),
+      inject: [ConfigService],
+    }),
+
     UserModule,
     ScheduleModule.forRoot(),
   ],
