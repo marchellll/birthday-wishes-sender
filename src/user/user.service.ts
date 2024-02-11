@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
-import { InjectModel } from '@nestjs/sequelize';
+import { InjectConnection, InjectModel } from '@nestjs/sequelize';
+import { Sequelize, Transaction } from 'sequelize';
 import { DateTime } from 'luxon';
 
 import { User } from './entities/user.entity';
@@ -16,16 +17,21 @@ export class UserService {
 
     @InjectModel(ScheduledMessages)
     private scheduled_message_model: typeof ScheduledMessages,
+
+    @InjectConnection()
+    private sequelize: Sequelize,
   ) {}
 
   async create(createUserDto: CreateUserDto) {
-    const user = await this.user_model.create({
-      ...createUserDto,
+    this.sequelize.transaction(async (transaction) => {
+      const user = await this.user_model.create({
+        ...createUserDto,
+      });
+
+      await this.upsertBirthdayMessage(user, transaction);
+
+      return user;
     });
-
-    await this.upsertBirthdayMessage(user)
-
-    return user;
   }
 
   async findAll() {
@@ -41,10 +47,14 @@ export class UserService {
   }
 
   async update(id: number, updateUserDto: UpdateUserDto) {
-    const user = await this.findOne(id);
-    const updated = await user.update(updateUserDto);
+    this.sequelize.transaction(async (transaction) => {
+      const user = await this.findOne(id);
+      const updated_user = await user.update(updateUserDto, { transaction });
 
-    return updated;
+      await this.upsertBirthdayMessage(updated_user, transaction);
+
+      return updated_user;
+    });
   }
 
   async remove(id: number) {
@@ -79,7 +89,7 @@ export class UserService {
     return next_birthday.toJSDate();
   };
 
-  async upsertBirthdayMessage(user: User) {
+  async upsertBirthdayMessage(user: User, transaction: Transaction) {
     // need to find the primary key for scheduled_messages
     // so we can update the record if it exists
     const scheduled_birthday_email = await this.scheduled_message_model.findOne({
@@ -87,6 +97,8 @@ export class UserService {
         user_id: user.id,
         recipient_type: 'email',
       },
+      lock: transaction.LOCK.UPDATE,
+      transaction,
     });
 
     await this.scheduled_message_model.upsert({
@@ -98,6 +110,8 @@ export class UserService {
       scheduled_at: this.calculateNextBirthday(user.birthdate, user.timezone),
       title: `Hey, ${user.firstname} ${user.lastname} it's your birthday`,
       body: `Hey, ${user.firstname} ${user.lastname} it's your birthday`,
+    }, {
+      transaction,
     });
   }
 }
