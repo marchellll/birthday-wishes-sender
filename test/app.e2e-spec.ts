@@ -1,6 +1,8 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication } from '@nestjs/common';
 import * as request from 'supertest';
+import { faker } from '@faker-js/faker';
+
 import { AppModule } from './../src/app.module';
 
 describe('AppController (e2e)', () => {
@@ -15,10 +17,26 @@ describe('AppController (e2e)', () => {
     await app.init();
   });
 
-  it('/ (GET)', () => {
-    return request(app.getHttpServer())
-      .get('/')
-      .expect(200)
-      .expect('Hello World!');
+  it('create & delete user', async () => {
+    const result = await request(app.getHttpServer())
+      .post('/user')
+      .send({
+        "firstname": faker.person.firstName(),
+        "lastname": faker.person.lastName(),
+        "email": faker.internet.email(),
+        "timezone": faker.location.timeZone(),
+        "birthdate": faker.date.birthdate().toISOString().substring(0, 10),
+      })
+      .expect(201);
+
+    const id = result.body.id;
+
+    await request(app.getHttpServer())
+      .delete(`/user/${id}`)
+      .expect(200);
+  });
+
+  afterEach(async () => {
+    app.close();
   });
 });

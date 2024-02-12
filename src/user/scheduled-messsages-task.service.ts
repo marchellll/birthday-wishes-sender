@@ -27,8 +27,8 @@ export class ScheduledMesssagesTaskService {
   // 10 minutes is the assumed equilibirum
   // it is not too fast so, 2 jobs (hopefully) won't overlap
   // and not too slow, so the message won't be too late
-  @Cron(CronExpression.EVERY_30_SECONDS) // for testing
-  // @Cron(CronExpression.EVERY_10_MINUTES)
+  // @Cron(CronExpression.EVERY_30_SECONDS) // for testing
+  @Cron(CronExpression.EVERY_10_MINUTES)
   async handleCron() {
     this.logger.debug('Sending scheduled messages');
 
