@@ -46,8 +46,17 @@ export class ScheduledMessagesProcessor {
         this.user_model.findByPk(user_id),
       ]);
 
-      // maybe validate here? if today is still birthday?
-      // if not, we can just delete the message
+      if (!message || !user) {
+        this.logger.error('Message or user not found');
+        return;
+      }
+
+      // check if schedule is still in the past
+      // probably already processed/editted before this job runs
+      if (DateTime.fromJSDate(message.scheduled_at) > DateTime.now()) {
+        this.logger.debug('Message is not yet due');
+        return;
+      }
 
       // this service is suck.
       // It doesnt have any idempotency key,
