@@ -23,7 +23,7 @@ export class UserService {
   ) {}
 
   async create(createUserDto: CreateUserDto) {
-    this.sequelize.transaction(async (transaction) => {
+    return await this.sequelize.transaction(async (transaction) => {
       const user = await this.user_model.create({
         ...createUserDto,
       });
@@ -47,7 +47,7 @@ export class UserService {
   }
 
   async update(id: number, updateUserDto: UpdateUserDto) {
-    this.sequelize.transaction(async (transaction) => {
+    return await this.sequelize.transaction(async (transaction) => {
       const user = await this.findOne(id);
       const updated_user = await user.update(updateUserDto, { transaction });
 
