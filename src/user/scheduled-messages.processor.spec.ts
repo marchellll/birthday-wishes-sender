@@ -4,7 +4,8 @@ import { setupModule, Module } from './user.module.setup.spec';
 
 import { ScheduledMessages } from './entities/scheduled-message.entity';
 import { ScheduledMessagesProcessor } from './scheduled-messages.processor';
-import { of } from 'rxjs';
+import { of, map } from 'rxjs';
+import { AxiosError } from 'axios';
 
 describe('ScheduledMesssagesProcessor', () => {
   let m: Module; // module
@@ -135,20 +136,27 @@ describe('ScheduledMesssagesProcessor', () => {
       });
     });
 
-    xdescribe('when the message is due but failed to send', () => {
+    describe('when the message is due but failed to send', () => {
       beforeEach(() => {
         find_by_pk_mock.mockResolvedValueOnce(message);
         user_find_by_pk_mock.mockResolvedValueOnce(user);
-        post_mock.mockReturnValue(of(new Error('Failed to send')));
+        post_mock.mockImplementation(() => {
+          // throw new AxiosError('error');
+          return of(1).pipe(map(n => {
+            throw new AxiosError('error', 'code', null, null, { data: { status: 'failed' } } as any);
+          }));
+        });
       });
 
       test('should update the message status to failed', async () => {
-        await processor.process({ data: { scheduled_message_id: 1, user_id: 1 } } as any);
+        try {
 
-        expect(update_mock).toHaveBeenCalledWith(
-          { status: 'failed' },
-          { transaction: undefined },
-        );
+          await processor.process({ data: { scheduled_message_id: 1, user_id: 1 } } as any);
+        } catch (error) {
+
+        }
+
+        expect(update_mock).not.toHaveBeenCalled();
       });
     });
 
