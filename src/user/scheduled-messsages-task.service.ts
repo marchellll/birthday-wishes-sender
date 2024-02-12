@@ -63,6 +63,7 @@ export class ScheduledMesssagesTaskService {
       const result = await this.schedule_message_queue.addBulk(messages.map((message) => ({
         data: {
           scheduled_message_id: message.id,
+          user_id: message.user_id,
         },
       })));
 
