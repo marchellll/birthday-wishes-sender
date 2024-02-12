@@ -1,5 +1,9 @@
 # Birthday Wishes Sender
 
+## System Design
+
+See the [System Design](./docs/system_design.md) for the system design.
+
 ## Installation
 
 ```bash

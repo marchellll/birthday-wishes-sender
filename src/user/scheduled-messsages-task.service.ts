@@ -55,7 +55,7 @@ export class ScheduledMesssagesTaskService {
         limit: 100,
       });
 
-      if (messages.length === 0) {
+      if (_.isEmpty(messages)) {
         this.logger.debug(`Message empty`);
         break;
       }

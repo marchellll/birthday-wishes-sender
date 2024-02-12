@@ -3,7 +3,6 @@ import { faker } from '@faker-js/faker';
 import { setupModule, Module } from './user.module.setup.spec';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { User } from './entities/user.entity';
-import { find } from 'rxjs';
 import { ScheduledMessages } from './entities/scheduled-message.entity';
 
 
@@ -165,6 +164,8 @@ describe('UserService', () => {
         const result = m.user_service.calculateNextBirthday(date, timezone);
 
         expect(result).toEqual(new Date('2020-06-03T01:59:59.000Z'));
+
+        jest.useRealTimers();
       });
     });
 
@@ -177,6 +178,8 @@ describe('UserService', () => {
         const result = m.user_service.calculateNextBirthday(date, timezone);
 
         expect(result).toEqual(new Date('2021-05-03T01:59:59.000Z'));
+
+        jest.useRealTimers();
       });
     });
   });
@@ -194,6 +197,10 @@ describe('UserService', () => {
       // @ts-ignore
       user = {
         id: faker.number.int(),
+        email: faker.internet.email(),
+        firstname: faker.person.firstName(),
+        lastname: faker.person.lastName(),
+        birthdate: new Date('1990-01-01'),
       };
       transaction = {
         LOCK: { UPDATE: 'update' },
@@ -218,12 +225,16 @@ describe('UserService', () => {
 
         expect(upsert_mock).toHaveBeenCalledTimes(1);
         expect(upsert_mock).toHaveBeenCalledWith({
-          id: null,
+          id: undefined,
+          title: expect.any(String),
+          body: expect.any(String),
           user_id: user.id,
           recipient: user.email,
           recipient_type: 'email',
           scheduled_at: expect.any(Date),
-        }, transaction);
+        }, {
+          transaction,
+        });
       });
     });
 
@@ -238,11 +249,15 @@ describe('UserService', () => {
         expect(upsert_mock).toHaveBeenCalledTimes(1);
         expect(upsert_mock).toHaveBeenCalledWith({
           id: found_message.id,
+          title: expect.any(String),
+          body: expect.any(String),
           user_id: user.id,
           recipient: user.email,
           recipient_type: 'email',
           scheduled_at: expect.any(Date),
-        }, transaction);
+        }, {
+          transaction,
+        });
       });
     });
   });
