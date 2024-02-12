@@ -18,13 +18,21 @@ This project implemented all the requirements of the project:
   - Adding NEW happy anniversary (or any other type of scheduled messages) is as easy as adding new rows to `scheduled_messages` table. And it will naturally works with the existing system.
 - Make sure your code is testable
   - The code is well tested with unit tests and e2e tests.
-  - The e2e only test the 2 endpoints
+  - The e2e only test the POST, PUT and DELETE endpoints. Email sending is not tested in e2e tests yet.
   - The unit tests cover 100% business logic, (wiring/configurations files are ignored)
 - High scalability
   - Using queue to handle the email sending, and the queue can be easily replaced with a more scalable solution like RabbitMQ or Kafka.
   - The system is designed to be stateless, and can be easily scaled horizontally and vertically.
   - Vertically by adding more cpu, so it can handle more concurrent requests and sending email tasks processing
   - Horizontally by adding more instances of the service. The queue is centralized in redis right now, so the tasks are distributed evenly among the instances.
+
+
+TODO:
+- move some hardcoded configurations to env
+- make abstraction layer for the email service
+- add interfaces
+- add more e2e tests for email sending
+- dockerfile and docker-compose for deployment
 
 
 

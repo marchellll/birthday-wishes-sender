@@ -29,7 +29,21 @@ describe('AppController (e2e)', () => {
       })
       .expect(201);
 
+    console.log(`Created: ${JSON.stringify(result.body)}`);
     const id = result.body.id;
+
+    const editted = await request(app.getHttpServer())
+      .put(`/user/${id}`)
+      .send({
+        "firstname": faker.person.firstName(),
+        "lastname": faker.person.lastName(),
+        "email": faker.internet.email(),
+        "timezone": faker.location.timeZone(),
+        "birthdate": faker.date.birthdate().toISOString().substring(0, 10),
+      })
+      .expect(200);
+    console.log(`Updated: ${JSON.stringify(editted.body)}`);
+
 
     await request(app.getHttpServer())
       .delete(`/user/${id}`)
